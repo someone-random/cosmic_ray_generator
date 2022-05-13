@@ -1,0 +1,9 @@
+DPMJET T 0
+SEED 12 0 0 
+SEED 13 0 0
+DIRECT /home/samr/Documents/III_Physics/Project/CORSIKA/simulations/
+RUNNR 15
+ERANGE 1E1 1E15
+NSHOW 100000
+ESLOPE -1.63
+EXIT
