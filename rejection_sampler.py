@@ -1,5 +1,5 @@
 """
-Rejection sampler for production of sea-level cosmic rays using the functions described in functions.py. 
+Rejection sampler for production of sea-level cosmic rays using the functions described in functions.py. This revolves around the generator class and its methods.
 """
 
 import numpy as np

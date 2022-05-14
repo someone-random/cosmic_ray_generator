@@ -6,3 +6,5 @@ the function element_resolve depends on having elements.csv alailable. This func
 A simple rejection sampler is given in rejection_sampler.py
 
 Dependencies: NumPy, SciPy, Pandas
+
+example-corsika-inputs is an example of CORSIKA inputs used
