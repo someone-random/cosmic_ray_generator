@@ -1,11 +1,15 @@
+"""
+A small test script to demonstrate the generator's useage.
+"""
+
 import functions
 from rejection_sampler import generator
 import numpy
 
-my_generator = generator(times=True,detector_area=1)
+time_gen = generator(times=True,detector_area=1)
 
-print(my_generator.create(10))
+print("10 Random energies and times:", time_gen.create(10), sep='\n',end='\n\n')
 
-my_generator2 = generator(times=False,with_angles=True)
+angle_gen = generator(times=False,with_angles=True)
 
-print(my_generator2.create(20))
+print("20 Random energies and angles:", angle_gen.create(20), sep='\n',end='\n\n')

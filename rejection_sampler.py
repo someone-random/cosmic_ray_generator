@@ -52,7 +52,7 @@ class generator:
 
 	def create(self,n=1):
 		"""
-		Wrapper for the with_angle or no_angle generator methods. Also creates and stacks particle times. Returns nx3 array with columns energy,angle,time, with the relevant zeros if not selected.
+		Wrapper for the with_angle or no_angle generator methods. Also creates and stacks particle times. Returns nx3 array with columns energy,angle,time, with the relevant zeros if not selected. Units are GeV, rad and s.
 		"""
 		output = self.create_with_angle(n=n) if self.with_angles else self.create_no_angle(n=n)
 		output = np.concatenate((output,self.time_creator(n)),axis=1)
