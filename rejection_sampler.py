@@ -11,11 +11,15 @@ import scipy.optimize as opt
 
 
 class generator:
-	def __init__(self,llim=0,ulim=1000, with_angles=True, sim_angles=False):
+	def __init__(self,llim=0,ulim=1000, with_angles=True,times=False,detector_area=None):
+		"""
+		Initialisation of cosmic ray generator. User can supply upper and lower limit energy values, and specify whether to calculate at the zenith or at any angle with the with_angles boolean, and wether to create times with the times boolean
+		"""
 		self.with_angles = with_angles
-		self.sim_angles = sim_angles
 		self.llim = llim
 		self.ulim = ulim
+		self.times = times
+		self.detector_area = detector_area
 		self.function = functions.theory_supressed if with_angles else functions.theory
 		
 	def wrapper(self,x,theta):
@@ -32,7 +36,7 @@ class generator:
 		isfinished = False
 		return_angles = []
 
-		if self.sim_angles:
+		if not self.with_angles:
 			return_angles = np.zeros(n)
 		else:
 			while not isfinished:
@@ -48,9 +52,10 @@ class generator:
 
 	def create(self,n=1):
 		"""
-		Wrapper for the with_angle or no_angle generator methods.
+		Wrapper for the with_angle or no_angle generator methods. Also creates and stacks particle times. Returns nx3 array with columns energy,angle,time, with the relevant zeros if not selected.
 		"""
 		output = self.create_with_angle(n=n) if self.with_angles else self.create_no_angle(n=n)
+		output = np.concatenate((output,self.time_creator(n)),axis=1)
 		return output
 	
 
@@ -91,8 +96,21 @@ class generator:
 				if random_y <= self.function(E_mu = random_x, theta=angle):
 					output_arr.append(np.append(random_x,angle))
 					isfinished = True
-			
 	
 		return np.array(output_arr)
+
+	def time_creator(self,n):
+		"""
+		Creates the times for particles to arrive, 
+		"""
+		if isinstance(self.detector_area, type(None)) & self.times:
+			raise Exception("If you specify times = True you must provide a detector area with the detector_area argument")
+		if self.times:
+			rate = 70 * 2 * np.pi * self.detector_area
+			scale = 1/rate
+			times = np.cumsum(random.exponential(scale=scale,size=n))
+		else:
+			times = np.zeros(shape=n)
+		return np.expand_dims(times, axis=1)
 
 
