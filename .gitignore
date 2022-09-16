@@ -1,3 +1,4 @@
-_pycashe_/
+__pycache__/
+*.pyc
 
 misc/misc_data/
