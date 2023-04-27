@@ -66,6 +66,7 @@ class generator:
 		isfinished = False
 		output_arr = []
 		maximum = opt.fmin(self.wrapper,x0=20,disp=False,full_output=True,args=(0,))
+		print(maximum)
 
 		while not isfinished:
 			random_x = random.uniform(low=self.llim,high=self.ulim)
