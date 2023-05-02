@@ -1,0 +1,3 @@
+[submodule "util"]
+	path = util
+	url = https://github.com/someone-random/cosmic_ray_generator.git
