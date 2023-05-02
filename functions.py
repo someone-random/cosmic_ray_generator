@@ -1,6 +1,7 @@
 import numpy as np 
 import pandas
 import scipy.special as spec
+from scipy import integrate
 
 
 
@@ -74,8 +75,27 @@ def element_resolve(particle):
 
 def composite(E_mu=0, cutoff=18857, truncate=0.1,theta=0):
 	"""
-	Evaluates either theory_supressed() (with theta=0) or best_fit() depending on range, the default lower cutoff being their coincidence at 18857 GeV. Input values below truncate (default= 0.1 GeV) will return zero.
+	Evaluates either theory_supressed() (with theta=0) or best_fit() depending on range,
+	the default lower cutoff being their coincidence at 18857 GeV. Input values below truncate 
+	(default= 0.1 GeV) will return zero.
 	"""
 	if (theta != 0):
 		raise Exception("Composite_function cannnot take non-zero Zenith angles") 
-	return np.where(E_mu<cutoff,np.where(E_mu < truncate, 0, best_fit(E_mu=E_mu)),theory_supressed(E_mu=E_mu))
+	#return np.where(E_mu<cutoff,np.where(E_mu < truncate, 0, best_fit(E_mu=E_mu)),theory_supressed(E_mu=E_mu))
+	if E_mu<=cutoff:
+		return best_fit(E_mu=E_mu)
+	print("no")
+	return theory_supressed(E_mu=E_mu)
+
+def scaledTheory(theta,E_mu):
+    scale=composite(E_mu=E_mu)/theory_supressed(E_mu=E_mu,theta=0)
+    return scale*theory_supressed(theta=theta,E_mu=E_mu)
+
+def integrated_theory(E_mu):
+    return np.float64(integrate.quad(scaledTheory, a=0, b=np.pi/2,args=(E_mu,))[0])
+
+def integrated_fast(E_mu):
+	coeffs=np.array([0.000164600469,-0.00215109323,0.00982817214,0.0589195321,\
+		  -0.828428934,2.61671857,1.16277379])
+	g=np.poly1d(coeffs)
+	return (10**g(np.log10(E_mu)))/E_mu**3
