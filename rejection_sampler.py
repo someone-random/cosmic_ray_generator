@@ -7,6 +7,7 @@ import sys
 import numpy.random as random
 import functions
 import scipy.optimize as opt
+from scipy import integrate
 
 
 
@@ -20,6 +21,7 @@ class generator:
 		self.ulim = ulim
 		self.times = times
 		self.detector_area = detector_area
+		# self.function = functions.theory_supressed if with_angles else functions.theory
 		self.function = functions.integrated_fast if with_angles else functions.composite
 		
 	def wrapper(self,x):
@@ -29,6 +31,13 @@ class generator:
 		output = -functions.integrated_fast(E_mu=x) if self.with_angles else -functions.composite(E_mu=x)
 		return output
 	
+	# def wrapper(self,x,theta):
+	# 	"""
+	# 	Wrapper (for maximum finding) for the correct PDF in functions.py depending on self.with_angles boolean.
+	# 	"""
+	# 	output = -functions.theory_supressed(E_mu=x,theta=theta) if self.with_angles else -functions.composite(E_mu=x)
+	# 	return output
+	
 	def wrapper2(self,theta,x):
 		"""
 		Wrapper (for maximum finding) for the correct PDF in functions.py depending on self.with_angles boolean.
@@ -36,26 +45,26 @@ class generator:
 		output = -functions.theory_supressed(E_mu=x,theta=theta)
 		return output
 
-	def angle_generator(self,n=1):
-		"""
-		Generates n angles according to cos^2 distribution or simulation data
-		"""
-		isfinished = False
-		return_angles = []
+	# def angle_generator(self,n=1):
+	# 	"""
+	# 	Generates n angles according to cos^2 distribution or simulation data
+	# 	"""
+	# 	isfinished = False
+	# 	return_angles = []
 
-		if not self.with_angles:
-			return_angles = np.zeros(n)
-		else:
-			while not isfinished:
-				thetamin = 0
-				thetamax = np.pi/2
-				random_theta = random.uniform(low=thetamin,high=thetamax)
-				random_y = random.rand()
-				if random_y <= np.cos(random_theta)**2:
-					return_angles.append(random_theta)
-				isfinished = False if len(return_angles) < n else True
+	# 	if not self.with_angles:
+	# 		return_angles = np.zeros(n)
+	# 	else:
+	# 		while not isfinished:
+	# 			thetamin = 0
+	# 			thetamax = np.pi/2
+	# 			random_theta = random.uniform(low=thetamin,high=thetamax)
+	# 			random_y = random.rand()
+	# 			if random_y <= np.cos(random_theta)**2:
+	# 				return_angles.append(random_theta)
+	# 			isfinished = False if len(return_angles) < n else True
 		
-		return return_angles
+	# 	return return_angles
 
 	def create(self,n=1):
 		"""
@@ -72,7 +81,7 @@ class generator:
 		"""
 		isfinished = False
 		output_arr = []
-		maximum = opt.fmin(self.wrapper,x0=20,disp=False,full_output=True)
+		maximum = opt.fminbound(self.wrapper,x1=self.llim, x2=self.ulim,disp=False,full_output=True)
 		
 		while not isfinished:
 			random_x = random.uniform(low=self.llim,high=self.ulim)
@@ -81,7 +90,7 @@ class generator:
 			if random_y <= self.function(random_x):
 				output_arr.append([random_x,0])
 			isfinished = False if len(output_arr) < n else True
-		
+		print(1)
 		return np.array(output_arr)
 
 	# def create_with_angle(self,n=1):
@@ -98,7 +107,7 @@ class generator:
 	# 		isfinished = False
 
 	# 		while not isfinished:
-	# 			random_x = random.triangular(left=self.llim, mode=maximum[0], right=self.ulim)
+	# 			random_x = random.uniform(low=self.llim, high=self.ulim)
 	# 			random_y = random.uniform(low=0,high=-maximum[1])
 	# 			if random_y <= self.function(E_mu = random_x, theta=angle):
 	# 				output_arr.append(np.append(random_x,angle))
@@ -130,7 +139,8 @@ class generator:
 		if isinstance(self.detector_area, type(None)) & self.times:
 			raise Exception("If you specify times = True you must provide a detector area with the detector_area argument")
 		if self.times:
-			rate = 70 * 2 * np.pi * self.detector_area
+			scaling=64.12300/integrate.quad(functions.integrated_fast, a=self.llim, b=self.ulim)[0]
+			rate = 86.607*2*np.pi * self.detector_area*10**-4 /scaling
 			scale = 1/rate
 			times = np.cumsum(random.exponential(scale=scale,size=n))
 		else:

@@ -84,7 +84,6 @@ def composite(E_mu=0, cutoff=18857, truncate=0.1,theta=0):
 	#return np.where(E_mu<cutoff,np.where(E_mu < truncate, 0, best_fit(E_mu=E_mu)),theory_supressed(E_mu=E_mu))
 	if E_mu<=cutoff:
 		return best_fit(E_mu=E_mu)
-	print("no")
 	return theory_supressed(E_mu=E_mu)
 
 def scaledTheory(theta,E_mu):
@@ -95,7 +94,7 @@ def integrated_theory(E_mu):
     return np.float64(integrate.quad(scaledTheory, a=0, b=np.pi/2,args=(E_mu,))[0])
 
 def integrated_fast(E_mu):
-	coeffs=np.array([0.000164600469,-0.00215109323,0.00982817214,0.0589195321,\
-		  -0.828428934,2.61671857,1.16277379])
+	coeffs=np.array([ 3.88611063e-04, -6.90846085e-03,  3.67707268e-02,  1.93046252e-02,\
+        -8.82281166e-01,  2.72979821e+00,  1.17488991e+00])
 	g=np.poly1d(coeffs)
 	return (10**g(np.log10(E_mu)))/E_mu**3
