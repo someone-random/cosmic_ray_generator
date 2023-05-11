@@ -8,13 +8,13 @@ Dependencies: NumPy, SciPy
 
 ## Build instructions
 Clone the git repo and build with pip
-```bat
+```console
 someone@github:~$ git clone https://github.com/someone-random/cosmic_ray_generator.git
 someone@github:~$ cd cosmic_ray_generator
 someone@github:~$ pip install .
 ```
 The program can be run by doing
-```bat
+```console
 someone@github:~$ MuCreate 1000
 ```
 which will create 1000 muons. Muons are generated with angles by default.
