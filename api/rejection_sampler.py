@@ -3,9 +3,8 @@ Rejection sampler for production of sea-level cosmic rays using the functions de
 """
 
 import numpy as np
-import sys
 import numpy.random as random
-import functions
+from .functions import *
 import scipy.optimize as opt
 from scipy import integrate
 
@@ -22,13 +21,13 @@ class generator:
 		self.times = times
 		self.detector_area = detector_area
 		# self.function = functions.theory_supressed if with_angles else functions.theory
-		self.function = functions.integrated_fast if with_angles else functions.composite
+		self.function = integrated_fast if with_angles else composite
 		
 	def wrapper(self,x):
 		"""
 		Wrapper (for maximum finding) for the correct PDF in functions.py depending on self.with_angles boolean.
 		"""
-		output = -functions.integrated_fast(E_mu=x) if self.with_angles else -functions.composite(E_mu=x)
+		output = -integrated_fast(E_mu=x) if self.with_angles else -composite(E_mu=x)
 		return output
 	
 	# def wrapper(self,x,theta):
@@ -42,7 +41,7 @@ class generator:
 		"""
 		Wrapper (for maximum finding) for the correct PDF in functions.py depending on self.with_angles boolean.
 		"""
-		output = -functions.theory_supressed(E_mu=x,theta=theta)
+		output = -theory_supressed(E_mu=x,theta=theta)
 		return output
 
 	# def angle_generator(self,n=1):
@@ -90,7 +89,6 @@ class generator:
 			if random_y <= self.function(random_x):
 				output_arr.append([random_x,0])
 			isfinished = False if len(output_arr) < n else True
-		print(1)
 		return np.array(output_arr)
 
 	# def create_with_angle(self,n=1):
@@ -127,7 +125,7 @@ class generator:
 				random_x=random.uniform(low=0,high=np.pi/2)
 				random_y=random.uniform(low=0,high=-maximum[1])
 
-				if random_y<=functions.theory_supressed(E_mu=E[0],theta=random_x):
+				if random_y<=theory_supressed(E_mu=E[0],theta=random_x):
 					output_arr.append(np.append(E[0],random_x))
 					finished=True
 		return np.array(output_arr)
@@ -139,7 +137,7 @@ class generator:
 		if isinstance(self.detector_area, type(None)) & self.times:
 			raise Exception("If you specify times = True you must provide a detector area with the detector_area argument")
 		if self.times:
-			scaling=64.12300/integrate.quad(functions.integrated_fast, a=self.llim, b=self.ulim)[0]
+			scaling=64.12300/integrate.quad(integrated_fast, a=self.llim, b=self.ulim)[0]
 			rate = 86.607*2*np.pi * self.detector_area*10**-4 /scaling
 			scale = 1/rate
 			times = np.cumsum(random.exponential(scale=scale,size=n))

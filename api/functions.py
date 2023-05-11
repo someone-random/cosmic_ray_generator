@@ -98,3 +98,9 @@ def integrated_fast(E_mu):
         -8.82281166e-01,  2.72979821e+00,  1.17488991e+00])
 	g=np.poly1d(coeffs)
 	return (10**g(np.log10(E_mu)))/E_mu**3
+
+# def integrated_fast(E_mu):
+# 	coeffs=np.array(([ 4.05232241e-04, -7.30338740e-03,  4.05996475e-02,  1.06852527e-03,
+#         -8.53022670e-01,  2.82746788e+00,  7.69578851e-01]))
+# 	g=np.poly1d(coeffs)
+# 	return (10**g(np.log10(E_mu)))/E_mu**3
