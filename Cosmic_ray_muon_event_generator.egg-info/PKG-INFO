@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: Cosmic-ray-muon-event-generator
+Version: 0.0.1
+Summary: A simple cosmic ray event generator. Generate muonswith some energy, angle and time.
+Home-page: https://github.com/someone-random/cosmic_ray_generator
+Author: Singh Atipunumphai
+Author-email: sa958@cam.ac.uk
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+
+This is a simple sea-level cosmic ray generator, that generates sea-level muons' energies and zenith angles.
+
+The functions for PDFs are given in functions.py
+the function element_resolve depends on having elements.csv alailable. This function is not used in the code but may be handy.
+
+A simple rejection sampler is given in rejection_sampler.py
+
+Dependencies: NumPy, SciPy, Pandas
+
+example-corsika-inputs is an example of CORSIKA inputs used
