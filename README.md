@@ -5,6 +5,11 @@ the function element_resolve depends on having elements.csv alailable. This func
 
 A simple rejection sampler is given in rejection_sampler.py
 
-Dependencies: NumPy, SciPy, Pandas
+Dependencies: NumPy, SciPy
 
-example-corsika-inputs is an example of CORSIKA inputs used
+Build instructions: Clone the git repo and build with pip
+```console
+someone@github: ~$ git clone https://github.com/someone-random/cosmic_ray_generator.git
+someone@github: ~$ cd cosmic_ray_generator
+someone@github: ~$ pip install .
+```
