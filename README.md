@@ -1,8 +1,5 @@
 # Muon cosmic ray event generator
-This is a simple sea-level cosmic ray generator, that generates sea-level muons' energies and zenith angles.
-
-The functions for PDFs are given in functions.py
-the function element_resolve depends on having elements.csv alailable. This function is not used in the code but may be handy.
+A cosmic ray event generator for muons at sea level. The original paper describing the generator is in writeup.pdf. Tests and corrections made to the generator is in cosmic_ray.pdf. The units for this generator are GeV for energy, seconds for time and cm^2 for detector area.
 
 Dependencies: NumPy, SciPy
 

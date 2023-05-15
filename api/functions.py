@@ -88,20 +88,26 @@ def composite(E_mu=0, cutoff=18857, truncate=0.1,theta=0):
 	return theory_supressed(E_mu=E_mu)
 
 def scaledTheory(theta,E_mu):
+    '''
+	Scales the theoretical model by matching it to composite. Required for integrated_theory 
+	to find the overall energy distribution.
+	'''
     scale=composite(E_mu=E_mu)/theory_supressed(E_mu=E_mu,theta=0)
     return scale*theory_supressed(theta=theta,E_mu=E_mu)
 
 def integrated_theory(E_mu):
+    '''
+	Finds the overall energy distribution (integrated over all angles). Not used in the generator 
+	because it is very slow but left in here if the user wants to change the theoretical model used
+	in the generator.
+	'''
     return np.float64(integrate.quad(scaledTheory, a=0, b=np.pi/2,args=(E_mu,))[0])
 
 def integrated_fast(E_mu):
+	'''
+	Outputs the fitted polynomial which approximates integrated_theory.
+	'''
 	coeffs=np.array([ 3.88611063e-04, -6.90846085e-03,  3.67707268e-02,  1.93046252e-02,\
         -8.82281166e-01,  2.72979821e+00,  1.17488991e+00])
 	g=np.poly1d(coeffs)
 	return (10**g(np.log10(E_mu)))/E_mu**3
-
-# def integrated_fast(E_mu):
-# 	coeffs=np.array(([ 4.05232241e-04, -7.30338740e-03,  4.05996475e-02,  1.06852527e-03,
-#         -8.53022670e-01,  2.82746788e+00,  7.69578851e-01]))
-# 	g=np.poly1d(coeffs)
-# 	return (10**g(np.log10(E_mu)))/E_mu**3
