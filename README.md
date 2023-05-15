@@ -14,7 +14,10 @@ The program can be run by doing
 ```console
 someone@github:~$ MuCreate 1000
 ```
-which will create 1000 muons. Muons are generated with angles by default.
+which will create 1000 muons. Muons are generated with angles by default. To store the output, run
+```console
+someone@github:~$ MuCreate 1000 > output_file
+```
 ## Optional arguments
 | Name        | Description | Default|
 | ----------- | ----------- |--------|

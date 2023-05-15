@@ -39,7 +39,9 @@ def main():
     )
     parser.set_defaults(times=False, angles=True)
     args = parser.parse_args()
-    return create(n=args.n, llim=args.llim, ulim=args.ulim, times=args.times, with_angles=args.angles, detector_area=args.det)
+    sol=create(n=args.n, llim=args.llim, ulim=args.ulim, times=args.times, with_angles=args.angles, detector_area=args.det)
+    for i in sol:
+        print(i)
 
 if __name__ == "__main__":
     main()
