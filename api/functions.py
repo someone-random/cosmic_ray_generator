@@ -1,7 +1,8 @@
 import numpy as np 
 import pandas
 import scipy.special as spec
-
+from scipy import integrate
+import warnings
 
 
 def supression(lambda_N=100, theta=0,E_mu=20,gamma=1.7,X_0=37, alphax0 = 2):
@@ -9,6 +10,7 @@ def supression(lambda_N=100, theta=0,E_mu=20,gamma=1.7,X_0=37, alphax0 = 2):
 	Returns supression factor for theoretical formula, all defualt constants are taken from ref. [5] in project
 	"""
 	p_1 = 1/(E_mu*np.cos(theta) + alphax0)
+	warnings.filterwarnings('ignore')
 	return ((lambda_N*np.cos(theta))/X_0)**p_1 * ((E_mu)/(E_mu + alphax0/np.cos(theta)))**(p_1 + gamma + 1) * spec.gamma(p_1 + 1)
 
 def theory(E_mu=1,theta=0):
@@ -74,8 +76,38 @@ def element_resolve(particle):
 
 def composite(E_mu=0, cutoff=18857, truncate=0.1,theta=0):
 	"""
-	Evaluates either theory_supressed() (with theta=0) or best_fit() depending on range, the default lower cutoff being their coincidence at 18857 GeV. Input values below truncate (default= 0.1 GeV) will return zero.
+	Evaluates either theory_supressed() (with theta=0) or best_fit() depending on range,
+	the default lower cutoff being their coincidence at 18857 GeV. Input values below truncate 
+	(default= 0.1 GeV) will return zero.
 	"""
 	if (theta != 0):
 		raise Exception("Composite_function cannnot take non-zero Zenith angles") 
-	return np.where(E_mu<cutoff,np.where(E_mu < truncate, 0, best_fit(E_mu=E_mu)),theory_supressed(E_mu=E_mu))
+	#return np.where(E_mu<cutoff,np.where(E_mu < truncate, 0, best_fit(E_mu=E_mu)),theory_supressed(E_mu=E_mu))
+	if E_mu<=cutoff:
+		return best_fit(E_mu=E_mu)
+	return theory_supressed(E_mu=E_mu)
+
+def scaledTheory(theta,E_mu):
+    '''
+	Scales the theoretical model by matching it to composite. Required for integrated_theory 
+	to find the overall energy distribution.
+	'''
+    scale=composite(E_mu=E_mu)/theory_supressed(E_mu=E_mu,theta=0)
+    return scale*theory_supressed(theta=theta,E_mu=E_mu)
+
+def integrated_theory(E_mu):
+    '''
+	Finds the overall energy distribution (integrated over all angles). Not used in the generator 
+	because it is very slow but left in here if the user wants to change the theoretical model used
+	in the generator.
+	'''
+    return np.float64(integrate.quad(scaledTheory, a=0, b=np.pi/2,args=(E_mu,))[0])
+
+def integrated_fast(E_mu):
+	'''
+	Outputs the fitted polynomial which approximates integrated_theory.
+	'''
+	coeffs=np.array([ 3.88611063e-04, -6.90846085e-03,  3.67707268e-02,  1.93046252e-02,\
+        -8.82281166e-01,  2.72979821e+00,  1.17488991e+00])
+	g=np.poly1d(coeffs)
+	return (10**g(np.log10(E_mu)))/E_mu**3

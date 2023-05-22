@@ -3,10 +3,10 @@ Rejection sampler for production of sea-level cosmic rays using the functions de
 """
 
 import numpy as np
-import sys
 import numpy.random as random
-import functions
+from .functions import *
 import scipy.optimize as opt
+from scipy import integrate
 
 
 
@@ -20,35 +20,21 @@ class generator:
 		self.ulim = ulim
 		self.times = times
 		self.detector_area = detector_area
-		self.function = functions.theory_supressed if with_angles else functions.theory
+		self.function = integrated_fast if with_angles else composite
 		
-	def wrapper(self,x,theta):
+	def wrapper(self,x):
 		"""
 		Wrapper (for maximum finding) for the correct PDF in functions.py depending on self.with_angles boolean.
 		"""
-		output = -functions.theory_supressed(E_mu=x,theta=theta) if self.with_angles else -functions.composite(E_mu=x)
+		output = -integrated_fast(E_mu=x) if self.with_angles else -composite(E_mu=x)
 		return output
-
-	def angle_generator(self,n=1):
+	
+	def wrapper2(self,theta,x):
 		"""
-		Generates n angles according to cos^2 distribution or simulation data
+		Wrapper (for maximum finding) for the correct PDF in functions.py depending on self.with_angles boolean.
 		"""
-		isfinished = False
-		return_angles = []
-
-		if not self.with_angles:
-			return_angles = np.zeros(n)
-		else:
-			while not isfinished:
-				thetamin = 0
-				thetamax = np.pi/2
-				random_theta = random.uniform(low=thetamin,high=thetamax)
-				random_y = random.rand()
-				if random_y <= np.cos(random_theta)**2:
-					return_angles.append(random_theta)
-				isfinished = False if len(return_angles) < n else True
-		
-		return return_angles
+		output = -theory_supressed(E_mu=x,theta=theta)
+		return output
 
 	def create(self,n=1):
 		"""
@@ -65,38 +51,35 @@ class generator:
 		"""
 		isfinished = False
 		output_arr = []
-		maximum = opt.fmin(self.wrapper,x0=20,disp=False,full_output=True,args=(0,))
-
+		maximum = opt.fminbound(self.wrapper,x1=self.llim, x2=self.ulim,disp=False,full_output=True)
+		
 		while not isfinished:
 			random_x = random.uniform(low=self.llim,high=self.ulim)
 			#random_x = random.triangular(left=self.llim, mode=maximum[0], right=self.ulim)
 			random_y = random.uniform(low=0,high=-maximum[1])
-			if random_y <= self.function(E_mu = random_x):
+			if random_y <= self.function(random_x):
 				output_arr.append([random_x,0])
 			isfinished = False if len(output_arr) < n else True
-		
 		return np.array(output_arr)
 
-	def create_with_angle(self,n=1):
-		"""
-		Creates n particles, returns nx2 array of momenta (GeV/c) and zenith angle (rad) sampled from functions.theory_supressed.
-		"""
-	
-		output_arr = []
+	def create_with_angle(self, n=1):
+		'''
+		New function for creating muons with angles.
+		'''
+		output_arr=[]
+		energies=self.create_no_angle(n=n)
+		
+		for E in energies:
+			maximum = opt.fmin(self.wrapper2,x0=20,disp=False, full_output=True,args=(E[0],))
+			
+			finished=False
+			while not finished:
+				random_x=random.uniform(low=0,high=np.pi/2)
+				random_y=random.uniform(low=0,high=-maximum[1])
 
-		angles = self.angle_generator(n=n)
-
-		for angle in angles:
-			maximum = opt.fmin(self.wrapper,x0=20,disp=False, full_output=True,args=(angle,))
-			isfinished = False
-
-			while not isfinished:
-				random_x = random.triangular(left=self.llim, mode=maximum[0], right=self.ulim)
-				random_y = random.uniform(low=0,high=-maximum[1])
-				if random_y <= self.function(E_mu = random_x, theta=angle):
-					output_arr.append(np.append(random_x,angle))
-					isfinished = True
-	
+				if random_y<=theory_supressed(E_mu=E[0],theta=random_x):
+					output_arr.append(np.append(E[0],random_x))
+					finished=True
 		return np.array(output_arr)
 
 	def time_creator(self,n):
@@ -106,7 +89,8 @@ class generator:
 		if isinstance(self.detector_area, type(None)) & self.times:
 			raise Exception("If you specify times = True you must provide a detector area with the detector_area argument")
 		if self.times:
-			rate = 70 * 2 * np.pi * self.detector_area
+			scaling=64.12300/integrate.quad(integrated_fast, a=self.llim, b=self.ulim)[0]
+			rate = 86.607*2*np.pi * self.detector_area*10**-4 /scaling
 			scale = 1/rate
 			times = np.cumsum(random.exponential(scale=scale,size=n))
 		else:
